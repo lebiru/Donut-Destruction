@@ -6,15 +6,13 @@ class StatusBar
 
 private:
 	
-	double time;
-	int health, score;
+	double startTime, health, score;
 
 public:
 
 	void initializeStatusBar();
 
-	double getTime()
-	{ return time;}
+	int getTime();
 
 	int getHealth()
 	{ return health;}
@@ -22,11 +20,12 @@ public:
 	int getScore()
 	{ return score;}
 
-	void startTime();
+	//void updateTime();
 	void resetTime();
 	void decrementHealth();
 	void resetHealth();
 	bool isDead();
+	void setScore(int a);
 
 
 };

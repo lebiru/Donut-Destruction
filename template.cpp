@@ -3,6 +3,7 @@
 #include "Bullet.h"
 #include "Enemy.h"
 #include "Donut.h"
+#include "StatusBar.h"
 #include <math.h>
 #include <vector>
 #include <iostream>
@@ -20,7 +21,7 @@ const int GAME_STATE = 2;
 const int OVER_STATE = 3;
 const int ABOUT_STATE = 4;
 const float gravity = 9.81;
-float CLOCK = 0;
+//float CLOCK = 0;
 int score = 0;
 
 
@@ -80,6 +81,11 @@ const int jump = 7;
 const int shoot = 8;
 const int shoot2 = 9; 
 
+//TEXT INDEXES
+const int CLOCK_INDEX = 1;
+const int SCORE_INDEX = 2;
+const int HEALTH_INDEX = 3;
+
 // GAME VARIABLES
 bool gameOver = false;
 int numOfDropGuys = 0;
@@ -96,6 +102,8 @@ void overToTitle();
 void overToGame();
 void titleToAbout();
 void aboutToTitle();
+
+StatusBar statusBar;
 
 
 
@@ -143,9 +151,6 @@ void app::Begin( void )
 	agk::LoadImage(BULLET_IMAGE, "images/bullet.png");
 	agk::LoadImage(ENEMY_IMAGE, "images/enemy.png");
 	agk::LoadImage(dgIMAGE, "images/dropguy.png");
-
-	
-	
 	
 	//LOAD SOUNDS
 	agk::LoadMusic(bgMusic, "sounds/Ambition.mp3");
@@ -157,6 +162,10 @@ void app::Begin( void )
 	agk::LoadSound(hit, "sounds/hit.wav");
 	agk::LoadSound(hit2, "sounds/hit2.wav");
 	agk::LoadSound(jump, "sounds/jump.wav");
+
+	//LOAD TEXT
+	agk::CreateText(CLOCK_INDEX, "");
+	agk::CreateText(SCORE_INDEX, "");
 
 
 	//Title Screen Initialization
@@ -172,9 +181,20 @@ void app::Begin( void )
 	agk::SetSpriteSize(TITLE_SCREEN, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 
-	
 	agk::PlayMusic(bgMusic);
+	agk::SetMusicSystemVolume(50);
 
+	statusBar.initializeStatusBar();
+
+	agk::SetTextPosition(CLOCK_INDEX, 80, 4);
+	agk::SetTextColor(CLOCK_INDEX, 0, 0, 0, 255);
+	agk::SetTextSize(CLOCK_INDEX, 30);
+
+	agk::SetTextPosition(SCORE_INDEX, 80, 15);
+	agk::SetTextColor(SCORE_INDEX, 0, 0, 0, 255);
+	agk::SetTextSize(SCORE_INDEX, 30);
+
+	
 
 	
 }
@@ -183,11 +203,7 @@ void app::Begin( void )
 void app::Loop ( void )
 {
 	
-	//Clock Timer
-	agk::SetPrintColor(0,0,0);
-	CLOCK = agk::GetRunTime();
-	agk::Print(CLOCK);
-	//agk::Print(agk::ScreenFPS());
+
 
 
 	//Title Screen
@@ -236,6 +252,12 @@ void app::Loop ( void )
 	if(gState == GAME_STATE)
 	{
 
+		//Clock Timer
+		//agk::SetPrintColor(0,0,0);
+		//statusBar.updateTime();
+		agk::SetTextString(CLOCK_INDEX, agk::Str(statusBar.getTime()));
+		
+		
 		
 		if(gameOver == false)
 		{
@@ -257,7 +279,7 @@ void app::Loop ( void )
 			//collision
 			bulletIsOOB(donutBlt, DONUT_MAX);
 			score = bulletCollisionEnemy(donutBlt, DONUT_MAX, enemy, ENEMY_MAX, score, EXPLOSION_IMAGE);
-
+			
 			
 			if(numOfDropGuys >= 5)
 			{
@@ -417,6 +439,9 @@ void titleToGame()
 		agk::DeleteSprite(TITLE_SCREEN);
 		agk::DeleteSprite(GAMEOVER_SCREEN);
 
+		//Restart game clock
+		statusBar.resetTime();
+
 		//Set up Game Screen
 		agk::CreateSprite(GAME_SCREEN, GAME_IMAGE);
 		agk::SetSpritePosition(GAME_SCREEN, 0,0);
@@ -481,6 +506,10 @@ void overToGame()
 
 	//Clean up Title
 	agk::DeleteSprite(GAMEOVER_SCREEN);
+
+
+	//Reset game timer
+	statusBar.resetTime();
 
 	//Set up Game Screen
 	agk::CreateSprite(GAME_SCREEN, GAME_IMAGE);

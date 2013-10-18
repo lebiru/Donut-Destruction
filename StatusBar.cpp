@@ -6,19 +6,20 @@
 void StatusBar::initializeStatusBar()
 {
 
-	double time = 0;
-	int health = 5; //Donut hit points
-	int score = 0; //Player score
+	startTime = 0;
+	health = 5; //Donut hit points
+	score = 0; //Player score
 }
 
-void StatusBar::startTime()
-{
-	time = agk::GetRunTime();
-}
 
 void StatusBar::resetTime()
 {
-	time = 0;
+	startTime = agk::GetRunTime();
+}
+
+int StatusBar::getTime()
+{
+	return agk::GetRunTime() - startTime;
 }
 
 void StatusBar::decrementHealth()
@@ -36,4 +37,9 @@ bool StatusBar::isDead()
 	(health <= 0) ? true : false;
 }
 
+void StatusBar::setScore(int a)
+{
+
+	score = a;
+}
 
