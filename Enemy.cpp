@@ -48,6 +48,11 @@ void Enemy::setDropGuySpeed(float a)
 
 }
 
+void Enemy::setDropGuyIsSafe(bool a)
+{
+	dropGuyIsSafe = a;
+}
+
 void Enemy::setGoingRight(bool a)
 {
 	goingRight = a;

@@ -20,10 +20,10 @@ public:
 	int getScore()
 	{ return score;}
 
-	//void updateTime();
 	void resetTime();
-	void decrementHealth();
 	void resetHealth();
+	void resetScore();
+	void decrementHealth();
 	bool isDead();
 	void setScore(int a);
 

@@ -190,7 +190,7 @@ void app::Begin( void )
 	agk::SetTextColor(CLOCK_INDEX, 0, 0, 0, 255);
 	agk::SetTextSize(CLOCK_INDEX, 30);
 
-	agk::SetTextPosition(SCORE_INDEX, 80, 15);
+	agk::SetTextPosition(SCORE_INDEX, 120, 32);
 	agk::SetTextColor(SCORE_INDEX, 0, 0, 0, 255);
 	agk::SetTextSize(SCORE_INDEX, 30);
 
@@ -252,9 +252,7 @@ void app::Loop ( void )
 	if(gState == GAME_STATE)
 	{
 
-		//Clock Timer
-		//agk::SetPrintColor(0,0,0);
-		//statusBar.updateTime();
+		
 		agk::SetTextString(CLOCK_INDEX, agk::Str(statusBar.getTime()));
 		
 		
@@ -262,8 +260,8 @@ void app::Loop ( void )
 		if(gameOver == false)
 		{
 			
-            //agk::Print(numOfDropGuys);
-			agk::Print(score);
+            agk::Print(numOfDropGuys);
+			
 
 			//update model
 			
@@ -278,8 +276,8 @@ void app::Loop ( void )
 
 			//collision
 			bulletIsOOB(donutBlt, DONUT_MAX);
-			score = bulletCollisionEnemy(donutBlt, DONUT_MAX, enemy, ENEMY_MAX, score, EXPLOSION_IMAGE);
-			
+			statusBar.setScore(bulletCollisionEnemy(donutBlt, DONUT_MAX, enemy, ENEMY_MAX, score, EXPLOSION_IMAGE));
+			agk::SetTextString(SCORE_INDEX, agk::Str(statusBar.getScore()));
 			
 			if(numOfDropGuys >= 5)
 			{
@@ -339,11 +337,6 @@ void app::Loop ( void )
 		}
 
 
-		
-
-		
-
-		//yes -> straight to game (ie skip title screen)
 
 	}
 
@@ -493,6 +486,10 @@ void overToTitle()
 {
 	//Clean up Title
 	agk::DeleteSprite(GAMEOVER_SCREEN);
+
+	//Clean up statusBar
+	agk::SetTextString(SCORE_INDEX, "");
+	agk::SetTextString(CLOCK_INDEX, "");
 	
 	//Set up Game Screen
 	agk::CreateSprite(TITLE_SCREEN, TITLE_IMAGE);
@@ -510,6 +507,7 @@ void overToGame()
 
 	//Reset game timer
 	statusBar.resetTime();
+	statusBar.resetScore();
 
 	//Set up Game Screen
 	agk::CreateSprite(GAME_SCREEN, GAME_IMAGE);
@@ -716,7 +714,8 @@ int bulletCollisionEnemy(Bullet b[], int bulletListSize, Enemy enemy[], int enem
 			//check if collided with dropguy
 			if( agk::GetSpriteExists(b[i].getIndex())
 				&& agk::GetSpriteExists(enemy[j].getDropGuyIndex())
-				&& agk::GetSpriteCollision(b[i].getIndex(), enemy[j].getDropGuyIndex()))
+				&& agk::GetSpriteCollision(b[i].getIndex(), enemy[j].getDropGuyIndex())
+				&& enemy[j].getDropGuyIsSafe() == false)
 			{
 				b[i].setAlive(false);
 				agk::DeleteSprite(b[i].getIndex());
@@ -754,6 +753,7 @@ void initializeEnemies(Enemy enemy[], int size, int start, int dgstart, int drop
 		enemy[i].setDropGuyX(0);
 		enemy[i].setDropGuyY(0);
 		enemy[i].setDropGuySpeed(dropguySpeed);
+		enemy[i].setDropGuyIsSafe(false);
 
 		enemy[i].setExplosionIndex(EXPLOSION_START + i);
 
@@ -817,6 +817,7 @@ int moveEnemy(Enemy enemy[], int size, int numOfDropGuys)
 			else
 			{
 				numOfDropGuys++;
+				enemy[i].setDropGuyIsSafe(true);
 			}
 
 		

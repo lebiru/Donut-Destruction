@@ -4,12 +4,19 @@
 class Enemy
 {
 
+/****************************************
+bool dropGuyIsSafe: Determines if a dropGuy can die from Donut's bullets.
+if True, he can die from the bullets. if False, he cannot die.
+
+
+*****************************************/
+
 private:
 	float x, y, speed;
 	float dgx, dgy, dgspeed; //dropguy variables
 	int index, dgindex, explosionIndex; //dgindex is DropGuy Index
-	bool goingRight; //determines if enemy is going right or left across screen
-
+	bool goingRight, dropGuyIsSafe; //determines if enemy is going right or left across screen
+	
 public:
 
 	float getX()
@@ -42,6 +49,11 @@ public:
 	int getExplosionIndex()
 	{ return explosionIndex;}
 
+	bool getDropGuyIsSafe()
+	{
+	  return dropGuyIsSafe;
+	}
+
 
 	void setX(float a);
 	void setY(float a);
@@ -52,6 +64,7 @@ public:
 	void setDropGuyY(float a);
 	void setDropGuyIndex(int a);
 	void setDropGuySpeed(float a);
+	void setDropGuyIsSafe(bool a);
 
 	void setGoingRight(bool a);
 

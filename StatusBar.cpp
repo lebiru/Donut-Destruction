@@ -17,6 +17,16 @@ void StatusBar::resetTime()
 	startTime = agk::GetRunTime();
 }
 
+void StatusBar::resetHealth()
+{
+	health = 5;
+}
+
+void StatusBar::resetScore()
+{
+	score = 0;
+}
+
 int StatusBar::getTime()
 {
 	return agk::GetRunTime() - startTime;
@@ -27,10 +37,7 @@ void StatusBar::decrementHealth()
 	health--;
 }
 
-void StatusBar::resetHealth()
-{
-	health = 5;
-}
+
 
 bool StatusBar::isDead()
 {
@@ -39,7 +46,6 @@ bool StatusBar::isDead()
 
 void StatusBar::setScore(int a)
 {
-
-	score = a;
+	score += a;
 }
 
