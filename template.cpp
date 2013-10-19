@@ -5,7 +5,6 @@
 #include "Donut.h"
 #include "StatusBar.h"
 #include <math.h>
-#include <vector>
 #include <iostream>
 
 using namespace std;
@@ -19,6 +18,7 @@ const int TITLE_STATE = 1;
 const int GAME_STATE = 2;
 const int OVER_STATE = 3;
 const int ABOUT_STATE = 4;
+const int HOW_STATE = 5;
 const float gravity = 9.81;
 int score = 0;
 
@@ -35,7 +35,8 @@ const int GAME_SCREEN = 2;
 const int GAMEOVER_SCREEN = 3;
 const int ABOUT_SCREEN = 4;
 const int DONUT_SPRITE = 5;
-const int DONUT_HEALTH_SPRITE = 6;
+const int DONUT_HEALTH_SPRITE = 99;
+const int HOW_SCREEN = 7;
 const int DONUT_START = 30; //30 - 33 donut bullets
 const int ENEMY_START = 105; //105 - 110
 
@@ -50,7 +51,8 @@ int GAME_IMAGE = 2;
 int GAMEOVER_IMAGE = 3;
 int ABOUT_IMAGE = 4;
 int DONUT_IMAGE = 5;
-int DONUT_HEALTH_IMAGE = 6;
+int DONUT_HEALTH_IMAGE = 200;
+int HOW_IMAGE = 7;
 int EXPLOSION_IMAGE = 80; //6 - 10 for explosions
 int BULLET_IMAGE = 30; //30 - 33 donut bullets
 int ENEMY_IMAGE = 40; //105 - 110
@@ -64,8 +66,6 @@ const int ENEMY_MAX = 10;
 Enemy enemy[ENEMY_MAX];
 
 int dgSpeed = 10;
-
-vector<int> donutHealth; //health bar holder for health sprite
 
 
 // MUSIC & SOUND EFFECTS
@@ -94,7 +94,8 @@ const float donutAngle_dx = 5; //How fast the Donut Turret rotates.
 
 
 //Function Declarations
-void titleToGame();
+void titleToHow();
+void howToGame();
 void gameToOver();
 void overToTitle();
 void overToGame();
@@ -103,8 +104,6 @@ void aboutToTitle();
 
 StatusBar statusBar;
 
-
-
 void manageEnemies(Enemy enemy[], int size, int start);
 
 void handlePlayerMovement();
@@ -112,7 +111,7 @@ void testCode();
 
 void initializeBullets(Bullet b[], int size, int start);
 void initializeEnemies(Enemy enemy[], int size, int start, int dgstart, int dropguySpeed, int EXPLOSION_START);
-void initializeHealth(vector<int> healthArray, int DONUT_HEALTH_INDEX);
+void initializeHealth(int DONUT_HEALTH_SPRITE, int DONUT_HEALTH_IMAGE);
 
 void moveBulletPlayer(Bullet b[], int size, float gravity);
 int moveEnemy(Enemy enemy[], int size, int numOfDropGuys);
@@ -132,10 +131,6 @@ void objectIsOOB(int spriteIndex); //turns off sprites that have gone out of bou
 int bulletCollisionEnemy(Bullet b[], int bulletListSize, Enemy enemy[], int enemyListSize, int score, int EXPLOSION_IMAGE);
 
 
-int donutHealthIndex = 99;
-
-
-
 // Begin app, called once at the start
 void app::Begin( void )
 {
@@ -145,6 +140,7 @@ void app::Begin( void )
 
 	//LOAD IMAGES
 	agk::LoadImage(TITLE_IMAGE, "images/titlescreen.png");
+	agk::LoadImage(HOW_IMAGE, "images/howtoplay.png");
 	agk::LoadImage(GAME_IMAGE, "images/maingame.png");
 	agk::LoadImage(GAMEOVER_IMAGE, "images/gameover.png");
 	agk::LoadImage(ABOUT_IMAGE, "images/about.png");
@@ -154,6 +150,7 @@ void app::Begin( void )
 	agk::LoadImage(ENEMY_IMAGE, "images/enemy.png");
 	agk::LoadImage(dgIMAGE, "images/dropguy.png");
 	agk::LoadImage(DONUT_HEALTH_IMAGE, "images/health.png");
+	
 	
 	//LOAD SOUNDS
 	agk::LoadMusic(bgMusic, "sounds/Ambition.mp3");
@@ -171,14 +168,6 @@ void app::Begin( void )
 	agk::CreateText(SCORE_INDEX, "");
 	agk::CreateText(HEALTH_INDEX, "");
 	
-	//Initialize Bullets
-	initializeBullets(donutBlt, DONUT_MAX, DONUT_START);
-	initializeEnemies(enemy, ENEMY_MAX, ENEMY_START, dgStart, dgSpeed, EXPLOSION_START); 
-    //initializeHealth(donutHealth, DONUT_HEALTH_SPRITE);
-	
-	
-
-
 	
 	//Initialize the Title Screen
 	agk::CreateSprite(TITLE_SCREEN, TITLE_IMAGE);
@@ -186,20 +175,15 @@ void app::Begin( void )
 	agk::SetSpriteSize(TITLE_SCREEN, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 
+	//Initialize Bullets
+	initializeBullets(donutBlt, DONUT_MAX, DONUT_START);
+	initializeEnemies(enemy, ENEMY_MAX, ENEMY_START, dgStart, dgSpeed, EXPLOSION_START); 
+    
+
 	agk::PlayMusic(bgMusic);
 	agk::SetMusicSystemVolume(50);
 
 	statusBar.initializeStatusBar();
-
-
-	//Create Health Icons
-
-	agk::CloneSprite(DONUT_HEALTH_SPRITE, donutHealthIndex);
-	agk::CreateSprite(donutHealthIndex, DONUT_HEALTH_IMAGE);
-	agk::SetSpritePosition(donutHealthIndex, 100, 100);
-
-
-
 
 
 	agk::SetTextPosition(CLOCK_INDEX, 80, 4);
@@ -213,6 +197,8 @@ void app::Begin( void )
 	agk::SetTextPosition(HEALTH_INDEX, 120, 60);
 	agk::SetTextColor(HEALTH_INDEX, 0, 0, 0, 255);
 	agk::SetTextSize(HEALTH_INDEX, 30);
+
+
 	
 
 	
@@ -225,7 +211,7 @@ void app::Loop ( void )
 {
 	
 
-	agk::Print("donut index: " + donutHealthIndex);
+	//agk::Print("donut index: " + donutHealthIndex);
 
 	//Title Screen
 	if(gState == TITLE_STATE)
@@ -234,8 +220,8 @@ void app::Loop ( void )
 		//transition to next state
 		if(agk::GetRawKeyPressed(AGK_KEY_SPACE))
 		{
-			gState = GAME_STATE;
-			titleToGame(); //transitions from the title screen to the game screen;
+			gState = HOW_STATE;
+			titleToHow(); //go from Title Screen to How to Play Screen
 
 		}
 
@@ -259,6 +245,20 @@ void app::Loop ( void )
 			aboutToTitle();
 		}
 	}
+
+	//HOW TO PLAY SCREEN
+	if(gState == HOW_STATE)
+	{
+
+		if(agk::GetRawKeyPressed(AGK_KEY_RIGHT))
+		{
+			gState = GAME_STATE;
+			howToGame();
+		
+		}
+
+
+	}
 	
 	//Game Screen
 	/*
@@ -276,14 +276,12 @@ void app::Loop ( void )
 		if(gameOver == false)
 		{
 			
-            agk::Print(numOfDropGuys);
+           // agk::Print(numOfDropGuys);
 			
 
 			//update model
 			
 			manageEnemies(enemy, ENEMY_MAX, ENEMY_START);
-			
-
 
 			//move
 			handlePlayerMovement();
@@ -294,6 +292,7 @@ void app::Loop ( void )
 			bulletIsOOB(donutBlt, DONUT_MAX);
 			statusBar.setScore(bulletCollisionEnemy(donutBlt, DONUT_MAX, enemy, ENEMY_MAX, score, EXPLOSION_IMAGE));
 			agk::SetTextString(SCORE_INDEX, agk::Str(statusBar.getScore()));
+			
 			
 			if(numOfDropGuys >= 5)
 			{
@@ -332,7 +331,7 @@ void app::Loop ( void )
 		
 
 		//play again?
-		if(agk::GetRawKeyState(AGK_KEY_LEFT))
+		if(agk::GetRawKeyState(AGK_KEY_UP))
 		{
 		
 			gState = TITLE_STATE;
@@ -343,7 +342,7 @@ void app::Loop ( void )
 		
 		}
 
-		if(agk::GetRawKeyState(AGK_KEY_RIGHT))
+		if(agk::GetRawKeyState(AGK_KEY_DOWN))
 		{
 			gState = GAME_STATE;
 			gameOver = false;
@@ -408,7 +407,7 @@ void handlePlayerMovement()
 				donutBlt[i].setAngle(agk::GetSpriteAngle(DONUT_SPRITE));
 				donutBlt[i].setYVelocity(d_blt_yspd);
 				agk::CreateSprite(donutBlt[i].getIndex(), BULLET_IMAGE);
-				agk::SetSpriteColor(donutBlt[i].getIndex(), agk::Random(100, 200), agk::Random(100, 200), agk::Random(100, 200), 255);
+				agk::SetSpriteColor(donutBlt[i].getIndex(), agk::Random(0, 255), agk::Random(0, 255), agk::Random(0, 255), 255);
 				agk::SetSpritePosition(donutBlt[i].getIndex(), (donutBlt[i].getX() + (agk::GetSpriteWidth(DONUT_SPRITE)/ 2) - 5), donutBlt[i].getY()); 
 
 				//play shoot sound
@@ -495,7 +494,7 @@ void gameToOver()
 	agk::DeleteSprite(GAME_SCREEN);
 	agk::DeleteSprite(TITLE_SCREEN);
 
-	//agk::DeleteSprite(DONUT_HEALTH_SPRITE);
+	agk::SetTextString(HEALTH_INDEX, "");
 	
 
 	//Set up Game Screen
@@ -543,8 +542,7 @@ void overToGame()
 	agk::SetSpritePosition(DONUT_SPRITE, SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - (agk::GetSpriteHeight(DONUT_SPRITE)));
 
 	//Set up Health icons
-	//agk::CreateSprite(DONUT_HEALTH_SPRITE, DONUT_HEALTH_IMAGE);
-	//agk::SetSpritePosition(DONUT_HEALTH_SPRITE, 20, 20);
+	initializeHealth(DONUT_HEALTH_SPRITE, DONUT_HEALTH_IMAGE);
 
 }
 
@@ -567,11 +565,17 @@ void manageEnemies(Enemy enemy[], int size, int start)
 
 	for(i; i < size; i++)
 	{
+
+		
+
 		//for a dead enemy
 		if(!agk::GetSpriteExists(enemy[i].getIndex()) && dropGuyChance < 20) 
 		{
 			
 			agk::CreateSprite(enemy[i].getIndex(), ENEMY_IMAGE);
+			agk::SetSpriteAnimation(enemy[i].getIndex(), 195, 146, 2);
+			agk::PlaySprite(enemy[i].getIndex(), agk::Random(2, 10), 1, 1, 2);
+			agk::SetSpriteColor(enemy[i].getIndex(), agk::Random(150, 255), agk::Random(200, 255), agk::Random(200, 255), 255);
 
 			//determines the start location of the enemy if it's going left or right
 			if(enemy[i].getGoingRight() == true)
@@ -598,6 +602,7 @@ void manageEnemies(Enemy enemy[], int size, int start)
 		   )	
 			{
 				agk::CreateSprite(enemy[i].getDropGuyIndex(), dgIMAGE);
+				agk::SetSpriteColor(enemy[i].getDropGuyIndex(), agk::Random(150, 255), agk::Random(100, 200), agk::Random(100, 200), 255);
 				agk::SetSpritePosition(enemy[i].getDropGuyIndex(), agk::GetSpriteX(enemy[i].getIndex()), enemy[i].getY() + 100);
 
 				agk::PlaySound(jump);
@@ -717,11 +722,17 @@ int bulletCollisionEnemy(Bullet b[], int bulletListSize, Enemy enemy[], int enem
 				b[i].setAlive(false);
 
 				//Explosion particles
-				agk::CreateParticles(enemy[j].getExplosionIndex(), agk::GetSpriteX(enemy[j].getIndex()), agk::GetSpriteY(enemy[j].getIndex()));
+				agk::CreateParticles(enemy[j].getExplosionIndex(), 
+					agk::GetSpriteX(enemy[j].getIndex()) + (agk::GetSpriteWidth(enemy[j].getExplosionIndex())/2), 
+					agk::GetSpriteY(enemy[j].getIndex()) + (agk::GetSpriteHeight(enemy[j].getExplosionIndex())/2));
 				agk::SetParticlesImage(enemy[j].getExplosionIndex(), EXPLOSION_IMAGE);
-		
-				agk::SetParticlesSize(enemy[j].getExplosionIndex(), 20);
+				agk::SetParticlesPosition(enemy[j].getIndex(), 
+					agk::GetSpriteX(enemy[j].getIndex()) + (agk::GetSpriteWidth(enemy[j].getExplosionIndex())/2),
+					agk::GetSpriteY(enemy[j].getIndex()) + (agk::GetSpriteHeight(enemy[j].getExplosionIndex())/2));
+
+				agk::SetParticlesSize(enemy[j].getExplosionIndex(), 50);
 				agk::SetParticlesDirection(enemy[j].getExplosionIndex(), 0, 200);
+				agk::SetParticlesAngle(enemy[j].getExplosionIndex(), agk::Random(1,359));
 				agk::SetParticlesLife(enemy[j].getExplosionIndex(), 3);
 				agk::SetParticlesMax(enemy[j].getExplosionIndex(), 10);
 				
@@ -886,17 +897,49 @@ void clearEnemies(Enemy b[], int size)
 
 }
 
-//Initializes the indexes of the health sprites
-void initializeHealth(vector<int> healthArray, int DONUT_HEALTH_INDEX)
+//Initializes the health icon
+void initializeHealth(int DONUT_HEALTH_INDEX, int DONUT_HEALTH_IMAGE)
 {
 	
-	//healthArray.resize(5);
-
-	//healthArray.push_back(agk::CloneSprite(DONUT_HEALTH_INDEX));
-	//healthArray.push_back(agk::CloneSprite(DONUT_HEALTH_INDEX));
-	//healthArray.push_back(agk::CloneSprite(DONUT_HEALTH_INDEX));
-	//healthArray.push_back(agk::CloneSprite(DONUT_HEALTH_INDEX));
-	//healthArray.push_back(agk::CloneSprite(DONUT_HEALTH_INDEX));
+	agk::CreateSprite(DONUT_HEALTH_SPRITE, DONUT_HEALTH_IMAGE);
+	agk::SetSpritePosition(DONUT_HEALTH_SPRITE, 70,60);
 	
+
+}
+
+void titleToHow()
+{
+	
+		agk::DeleteSprite(TITLE_SCREEN);	
+		
+
+		agk::CreateSprite(HOW_SCREEN, HOW_IMAGE);
+		agk::SetSpritePosition(HOW_SCREEN, 0,0);
+		agk::SetSpriteSize(HOW_SCREEN, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+}
+
+void howToGame()
+{
+
+		agk::DeleteSprite(HOW_SCREEN);	
+
+		//Restart game clock
+		statusBar.resetTime();
+		statusBar.resetScore();
+		statusBar.resetHealth();
+
+		//Set up Game Screen
+		agk::CreateSprite(GAME_SCREEN, GAME_IMAGE);
+		agk::SetSpritePosition(GAME_SCREEN, 0,0);
+		agk::SetSpriteSize(GAME_SCREEN, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+		//Set up Donut Player
+		agk::CreateSprite(DONUT_SPRITE, DONUT_IMAGE);
+		agk::SetSpritePosition(DONUT_SPRITE, SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - (agk::GetSpriteHeight(DONUT_SPRITE)));
+
+		//initialize health icon
+		initializeHealth(DONUT_HEALTH_SPRITE, DONUT_HEALTH_IMAGE);
+
 
 }
