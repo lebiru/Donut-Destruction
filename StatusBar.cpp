@@ -32,9 +32,9 @@ int StatusBar::getTime()
 	return agk::GetRunTime() - startTime;
 }
 
-void StatusBar::decrementHealth()
+void StatusBar::setHealth(int a)
 {
-	health--;
+	health += a;
 }
 
 

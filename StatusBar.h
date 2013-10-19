@@ -23,7 +23,7 @@ public:
 	void resetTime();
 	void resetHealth();
 	void resetScore();
-	void decrementHealth();
+	void setHealth(int a);
 	bool isDead();
 	void setScore(int a);
 
