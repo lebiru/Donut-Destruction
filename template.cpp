@@ -134,9 +134,9 @@ int bulletCollisionEnemy(Bullet b[], int bulletListSize, Enemy enemy[], int enem
 // Begin app, called once at the start
 void app::Begin( void )
 {
-	agk::SetVirtualResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
-	
 
+	agk::SetVirtualResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
+	agk::SetWindowTitle("Donut Destruction");
 
 	//LOAD IMAGES
 	agk::LoadImage(TITLE_IMAGE, "images/titlescreen.png");
@@ -150,7 +150,6 @@ void app::Begin( void )
 	agk::LoadImage(ENEMY_IMAGE, "images/enemy.png");
 	agk::LoadImage(dgIMAGE, "images/dropguy.png");
 	agk::LoadImage(DONUT_HEALTH_IMAGE, "images/health.png");
-	
 	
 	//LOAD SOUNDS
 	agk::LoadMusic(bgMusic, "sounds/Ambition.mp3");
@@ -178,10 +177,10 @@ void app::Begin( void )
 	//Initialize Bullets
 	initializeBullets(donutBlt, DONUT_MAX, DONUT_START);
 	initializeEnemies(enemy, ENEMY_MAX, ENEMY_START, dgStart, dgSpeed, EXPLOSION_START); 
-    
 
 	agk::PlayMusic(bgMusic);
-	agk::SetMusicSystemVolume(50);
+	agk::SetMusicSystemVolume(5);
+	agk::SetSoundSystemVolume(5);
 
 	statusBar.initializeStatusBar();
 
@@ -197,11 +196,6 @@ void app::Begin( void )
 	agk::SetTextPosition(HEALTH_INDEX, 120, 60);
 	agk::SetTextColor(HEALTH_INDEX, 0, 0, 0, 255);
 	agk::SetTextSize(HEALTH_INDEX, 30);
-
-
-	
-
-	
 
 	
 }
@@ -276,11 +270,7 @@ void app::Loop ( void )
 		if(gameOver == false)
 		{
 			
-           // agk::Print(numOfDropGuys);
-			
-
 			//update model
-			
 			manageEnemies(enemy, ENEMY_MAX, ENEMY_START);
 
 			//move
@@ -331,7 +321,7 @@ void app::Loop ( void )
 		
 
 		//play again?
-		if(agk::GetRawKeyState(AGK_KEY_UP))
+		if(agk::GetRawKeyState(AGK_KEY_DOWN))
 		{
 		
 			gState = TITLE_STATE;
@@ -342,7 +332,7 @@ void app::Loop ( void )
 		
 		}
 
-		if(agk::GetRawKeyState(AGK_KEY_DOWN))
+		if(agk::GetRawKeyState(AGK_KEY_UP))
 		{
 			gState = GAME_STATE;
 			gameOver = false;
@@ -459,10 +449,6 @@ void titleToGame()
 		//Set up Game Screen
 		agk::CreateSprite(DONUT_SPRITE, DONUT_IMAGE);
 		agk::SetSpritePosition(DONUT_SPRITE, SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - (agk::GetSpriteHeight(DONUT_SPRITE)));
-
-		//Set up health icons
-		//agk::CreateSprite(DONUT_HEALTH_SPRITE, DONUT_HEALTH_IMAGE);
-		//agk::SetSpritePosition(DONUT_HEALTH_SPRITE, 40, 80);
 
 }
 
@@ -705,8 +691,6 @@ int bulletCollisionEnemy(Bullet b[], int bulletListSize, Enemy enemy[], int enem
 {
 	int i = 0;
 
-	
-
 	for(i; i < bulletListSize; i++) //for all the bullets
 	{
 
@@ -923,6 +907,7 @@ void howToGame()
 {
 
 		agk::DeleteSprite(HOW_SCREEN);	
+		agk::DeleteSprite(TITLE_SCREEN);
 
 		//Restart game clock
 		statusBar.resetTime();
